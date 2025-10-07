@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Om Ajinath Shende — 3D Portfolio</title>
+  <style>
+    :root{--bg:#0b0f1a;--panel:rgba(255,255,255,0.05);--accent:#7bd389;--glass:rgba(255,255,255,0.08)}
+    html,body{height:100%;margin:0;font-family:'Inter',system-ui,Arial;color:#e6eef8;background:var(--bg);overflow-x:hidden}
+    #canvas-wrap{position:fixed;inset:0;z-index:0}
+    .site{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
+    header{display:flex;align-items:center;justify-content:space-between;padding:28px 40px}
+    .brand{font-weight:700;letter-spacing:0.6px}
+    .brand small{display:block;font-weight:400;font-size:12px;opacity:0.8}
+    main{flex:1;display:flex;align-items:center;flex-direction:column;justify-content:center;text-align:center;padding:40px}
+    .hero{max-width:800px;background:var(--panel);backdrop-filter:blur(8px);padding:32px;border-radius:16px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+    h1{margin:0;font-size:40px;color:#ffffff}
+    p.lead{margin-top:10px;color:#cfe6ff;opacity:0.95;font-size:18px}
+    .btn{display:inline-block;margin-top:18px;padding:12px 20px;border-radius:12px;background:var(--accent);color:#052017;text-decoration:none;font-weight:600;font-size:16px}
+    footer{padding:28px 40px;color:#9fb0d6;font-size:14px;text-align:center}
+  </style>
+</head>
+<body>
+  <div id="canvas-wrap"></div>
+  <div class="site">
+    <header>
+      <div class="brand">Om Ajinath Shende <small>3D Animator • VFX • Motion Graphics</small></div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>Hi, I'm Om Ajinath Shende</h1>
+        <p class="lead">3D Animator & VFX Artist skilled in Autodesk Maya, Nuke, PFTrack, Silhouette, After Effects, and Photoshop. I create cinematic 3D animations, visual effects, and motion graphics for films, ads, and interactive media. Open to remote work with USA clients.</p>
+        <a class="btn" href="https://www.youtube.com/@Omshende_57" target="_blank">🎥 Watch My Reel</a>
+      </section>
+    </main>
+
+    <footer>
+      © <span id="year"></span> Om Ajinath Shende — Available for Remote Work • 3D Portfolio
+    </footer>
+  </div>
+
+  <!-- three.js 3D Animated Car Scene -->
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.159.0/build/three.module.js';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.159.0/examples/jsm/loaders/GLTFLoader.js';
+
+    let scene, camera, renderer, car;
+    const canvasWrap = document.getElementById('canvas-wrap');
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 2000);
+    camera.position.set(0, 3, 10);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    canvasWrap.appendChild(renderer.domElement);
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x202020, 1);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(5, 10, 7.5);
+    scene.add(dirLight);
+
+    // Floor
+    const floorGeo = new THREE.PlaneGeometry(200, 200);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -1.2;
+    scene.add(floor);
+
+    // Load 3D car model (placeholder free model from three.js examples)
+    const loader = new GLTFLoader();
+    loader.load('https://threejs.org/examples/models/gltf/Flamingo.glb', (gltf) => {
+      car = gltf.scene;
+      car.scale.set(0.05, 0.05, 0.05);
+      scene.add(car);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (car) {
+        car.rotation.y += 0.01;
+        car.position.x = Math.sin(Date.now() * 0.001) * 2;
+      }
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    animate();
+  </script>
+</body>
+</html>
