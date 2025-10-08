@@ -1,60 +1,66 @@
+// Import required modules from Three.js CDN
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js';
 
 // Scene setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0x0b0f14); // dark background
 
 // Camera setup
 const camera = new THREE.PerspectiveCamera(
-  75,
+  60,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
 );
-camera.position.set(0, 1, 5);
+camera.position.set(3, 2, 5);
 
 // Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild(renderer.domElement);
 
-// Controls setup
+// Orbit Controls setup
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enableZoom = true;
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+// Lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(5, 10, 7.5);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+directionalLight.position.set(10, 10, 10);
 scene.add(directionalLight);
 
-// Background Texture
-const textureLoader = new THREE.TextureLoader();
-const bgTexture = textureLoader.load('https://threejs.org/examples/textures/cube/skyboxsun25deg/test.jpg');
-scene.background = bgTexture;
+// Ground Plane (optional)
+const groundGeo = new THREE.PlaneGeometry(200, 200);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.2;
+scene.add(ground);
 
-// Load Lamborghini car model
+// Load Lamborghini GLTF Model
 const loader = new GLTFLoader();
-let carModel;
-
 loader.load(
+  // ✅ change this path if model is local
   'https://threejs.org/examples/models/gltf/Lamborghini_Aventador/glTF/Lamborghini_Aventador.gltf',
   (gltf) => {
-    carModel = gltf.scene;
+    const carModel = gltf.scene;
     carModel.scale.set(0.02, 0.02, 0.02);
     carModel.position.set(0, 0, 0);
     scene.add(carModel);
   },
   undefined,
-  (error) => console.error('Error loading car model:', error)
+  (error) => {
+    console.error('Error loading Lamborghini model:', error);
+  }
 );
 
-// Resize handling
+// Handle window resize
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -64,11 +70,6 @@ window.addEventListener('resize', () => {
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
-
-  if (carModel) {
-    carModel.rotation.y += 0.01; // Rotate car slowly
-  }
-
   controls.update();
   renderer.render(scene, camera);
 }
